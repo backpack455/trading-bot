@@ -1,0 +1,1 @@
+# my attempt to create a trading bot in python
