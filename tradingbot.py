@@ -23,7 +23,7 @@ class MLTrader(Strategy):
         self.last_trade = None
         self.cash_at_risk = cash_at_risk
 
-    def position_sizing():
+    def position_sizing(self):
         cash = self.get_cash()
         last_price = self.get_last_price(self.symbol)
         # Calculate the number of shares to buy, units per
@@ -35,7 +35,7 @@ class MLTrader(Strategy):
 
         if cash > last_price: # only if you have cash execute
             if self.last_trade == None:
-                order = self.create_order(self.symbol, quantity, "buy", type="bracket")
+                order = self.create_order(self.symbol, quantity, "buy", type="bracket", take_profit_price=last_price*1.2, stop_loss_price=last_price*0.95)
                 self.submit_order(order)
                 self.last_trade = "buy"
     
