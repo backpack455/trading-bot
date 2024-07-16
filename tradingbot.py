@@ -3,6 +3,8 @@ from lumibot.backtesting import YahooDataBacktesting
 from lumibot.strategies.strategy import Strategy
 from lumibot.traders import Trader
 from datetime import datetime 
+from alpaca_trade_api import REST
+from datetime import timedelta
 
 API_KEY = "PKY4ZBVBSAZI9GZ0HMAI"
 
@@ -22,6 +24,7 @@ class MLTrader(Strategy):
         self.sleeptime = "24H"
         self.last_trade = None
         self.cash_at_risk = cash_at_risk
+        self.api = REST(base_url=BASE_URL, key_id=API_KEY, secret_key=API_SECRET)
 
     def position_sizing(self):
         cash = self.get_cash()
@@ -29,11 +32,24 @@ class MLTrader(Strategy):
         # Calculate the number of shares to buy, units per
         quantity = round (cash * self.cash_at_risk / last_price, 0) # round to nearest whole number
         return cash, last_price, quantity
+    
+    def get_dates(self): 
+        today = self.get_datetime()
+        three_days_prior = today - timedelta(days=3)
+        return today.strftime('%Y-%m-%d'), three_days_prior.strftime('%Y-%m-%d')
+
+    def get_news(self):
+        today, three_days_prior = self.get_dates()
+        news = self.api.get_news(symbol=self.symbol, start=three_days_prior, end=today) 
+        news = [ev.__dict__["_raw"]["headline"] for ev in news]
+        return news
 
     def on_trading_iteration(self):
         cash, last_price, quantity = self.position_sizing()
 
         if cash > last_price: # only if you have cash execute
+            news = self.get_news()
+            print(news)
             if self.last_trade == None:
                 order = self.create_order(self.symbol, quantity, "buy", type="bracket", take_profit_price=last_price*1.2, stop_loss_price=last_price*0.95)
                 self.submit_order(order)
