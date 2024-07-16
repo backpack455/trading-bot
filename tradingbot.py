@@ -6,6 +6,8 @@ from datetime import datetime
 from alpaca_trade_api import REST
 from datetime import timedelta
 
+from finbert_utils import estimate_sentiment
+
 API_KEY = "PKY4ZBVBSAZI9GZ0HMAI"
 
 API_SECRET = "SVwclaSal6xW7dxOyZ2Gh60oP69xckrLmvooEB7I"   
@@ -42,21 +44,33 @@ class MLTrader(Strategy):
         today, three_days_prior = self.get_dates()
         news = self.api.get_news(symbol=self.symbol, start=three_days_prior, end=today) 
         news = [ev.__dict__["_raw"]["headline"] for ev in news]
-        return news
+        probability, sentiment = estimate_sentiment(news)
+        return probability, sentiment
 
     def on_trading_iteration(self):
         cash, last_price, quantity = self.position_sizing()
 
+        probability, sentiment = self.get_sentiment()
+
         if cash > last_price: # only if you have cash execute
-            news = self.get_news()
-            print(news)
-            if self.last_trade == None:
+            # print(news)
+            
+            if sentiment == "positive" and probability > 0.999:
+                if self.last_trade == "sell":
+                    self.sell_all()
+
                 order = self.create_order(self.symbol, quantity, "buy", type="bracket", take_profit_price=last_price*1.2, stop_loss_price=last_price*0.95)
                 self.submit_order(order)
                 self.last_trade = "buy"
+            elif sentiment == "negative" and probability > 0.999:
+                if self.last_trade == "buy":
+                    self.sell_all()
+                order = self.create_order(self.symbol, quantity, "sell", type="bracket", take_profit_price=last_price*0.8, stop_loss_price=last_price*1.05)
+                self.submit_order(order)
+                self.last_trade = "sell"
     
 
-start_date = datetime(2023, 12, 15)
+start_date = datetime(2020, 1, 1)
 end_date = datetime(2023, 12, 31)
 
 broker = Alpaca(ALPACE_CREDITS)
