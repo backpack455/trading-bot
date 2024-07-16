@@ -8,11 +8,11 @@ from datetime import timedelta
 
 from finbert_utils import estimate_sentiment
 
-API_KEY = "PKY4ZBVBSAZI9GZ0HMAI"
+API_KEY = ""
 
-API_SECRET = "SVwclaSal6xW7dxOyZ2Gh60oP69xckrLmvooEB7I"   
+API_SECRET = ""   
 
-BASE_URL = "https://paper-api.alpaca.markets/v2"
+BASE_URL = ""
 
 ALPACE_CREDITS = {
     "API_KEY": API_KEY,
