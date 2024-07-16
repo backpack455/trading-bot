@@ -77,9 +77,12 @@ broker = Alpaca(ALPACE_CREDITS)
 
 strategy = MLTrader(name='mlstrat', broker = broker, parameters={"symbol": "SPY", "cash_at_risk": 0.5})
 
-strategy.backtest(
-    YahooDataBacktesting,
-    start_date,
-    end_date,
-    parameters={}
-)
+# strategy.backtest(
+#     YahooDataBacktesting,
+#     start_date,
+#     end_date,
+#     parameters={}
+# )
+trader = Trader()
+trader.add_strategy(strategy)
+trader.run_all()
