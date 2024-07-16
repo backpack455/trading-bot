@@ -38,7 +38,7 @@ class MLTrader(Strategy):
         three_days_prior = today - timedelta(days=3)
         return today.strftime('%Y-%m-%d'), three_days_prior.strftime('%Y-%m-%d')
 
-    def get_news(self):
+    def get_sentiment(self):
         today, three_days_prior = self.get_dates()
         news = self.api.get_news(symbol=self.symbol, start=three_days_prior, end=today) 
         news = [ev.__dict__["_raw"]["headline"] for ev in news]
